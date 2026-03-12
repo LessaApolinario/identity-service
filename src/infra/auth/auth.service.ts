@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { CreateUserRequest } from 'src/core/@types/http/request/CreateUserRequest';
 import { CredentialsRequest } from 'src/core/@types/http/request/CredentialsRequest';
 import { AuthResponse } from 'src/core/@types/http/response/AuthResponse';
@@ -7,19 +8,22 @@ import { AuthUseCase } from 'src/core/interfaces/usecases/AuthUseCase';
 
 @Injectable()
 export class AuthService extends AuthUseCase {
-  constructor(private authAdapter: AuthAdapter) {
+  constructor(
+    private authAdapter: AuthAdapter,
+    private jwtService: JwtService,
+  ) {
     super();
   }
 
   login(credentials: CredentialsRequest): Promise<AuthResponse> {
-    return this.authAdapter.login(credentials);
+    throw new Error('Method not implemented.');
   }
 
-  register(user: CreateUserRequest): Promise<AuthResponse> {
-    return this.authAdapter.register(user);
+  register(user: CreateUserRequest): Promise<boolean> {
+    throw new Error('Method not implemented.');
   }
 
   refresh(token: string): Promise<AuthResponse> {
-    return this.authAdapter.refresh(token);
+    throw new Error('Method not implemented.');
   }
 }

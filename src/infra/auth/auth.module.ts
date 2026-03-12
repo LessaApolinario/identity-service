@@ -2,11 +2,10 @@ import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { AuthUseCase } from '../../domain/interfaces/usecases/AuthUseCase';
+import { AuthUseCase } from 'src/core/interfaces/usecases/AuthUseCase';
 import { DatabaseModule } from '../database/database.module';
 import { EnvModule } from '../env/env.module';
 import { EnvService } from '../env/env.service';
-import { UserModule } from '../user/user.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
@@ -15,7 +14,7 @@ import { JwtStrategy } from './jwt.strategy';
 @Module({
   imports: [
     DatabaseModule,
-    UserModule,
+    AuthModule,
     PassportModule,
     EnvModule,
     JwtModule.registerAsync({
