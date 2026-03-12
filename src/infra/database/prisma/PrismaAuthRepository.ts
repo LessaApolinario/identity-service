@@ -1,4 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import bcrypt from 'bcryptjs';
 import { CreateUserRequest } from 'src/core/@types/http/request/CreateUserRequest';
 import { CredentialsRequest } from 'src/core/@types/http/request/CredentialsRequest';
 import { User } from 'src/core/domain/models/User';
@@ -11,11 +17,52 @@ export class PrismaAuthRepository extends AuthAdapter {
     super();
   }
 
-  login(credentials: CredentialsRequest): Promise<User> {
-    throw new Error('Method not implemented.');
+  async login(credentials: CredentialsRequest): Promise<User> {
+    const { email, password } = credentials;
+
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
+
+    const passwordMatch = bcrypt.compareSync(password, user.password);
+
+    if (!passwordMatch) {
+      throw new UnauthorizedException('Invalid credentials.');
+    }
+
+    return user;
   }
 
-  register(user: CreateUserRequest): Promise<boolean> {
-    throw new Error('Method not implemented.');
+  async register(user: CreateUserRequest): Promise<boolean> {
+    const { name, lastName, email, password } = user;
+
+    const foundUser = await this.prismaService.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (foundUser) {
+      throw new ConflictException('User already exists.');
+    }
+
+    const hashedPassword = bcrypt.hashSync(password);
+
+    const newUser = await this.prismaService.user.create({
+      data: {
+        name,
+        lastName,
+        email,
+        passwordHash: hashedPassword,
+      },
+    });
+
+    return !!newUser?.id;
   }
 }
