@@ -1,0 +1,11 @@
+services:
+  identity-service-backend-database:
+    image: postgres:18-alpine
+    restart: always
+    container_name: identity-service-backend-database
+    ports:
+      - "${POSTGRES_HOST_PORT:-7401}:5432"
+    env_file:
+      - .env
+    volumes:
+      - ./data/pg:/var/lib/postgresql/data 
