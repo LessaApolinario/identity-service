@@ -30,7 +30,7 @@ export class PrismaAuthRepository extends AuthAdapter {
       throw new NotFoundException('User not found.');
     }
 
-    const passwordMatch = bcrypt.compareSync(password, user.password);
+    const passwordMatch = bcrypt.compareSync(password, user.passwordHash);
 
     if (!passwordMatch) {
       throw new UnauthorizedException('Invalid credentials.');
@@ -52,7 +52,7 @@ export class PrismaAuthRepository extends AuthAdapter {
       throw new ConflictException('User already exists.');
     }
 
-    const hashedPassword = bcrypt.hashSync(password);
+    const hashedPassword = bcrypt.hashSync(password, 10);
 
     const newUser = await this.prismaService.user.create({
       data: {

@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserRequest } from 'src/core/@types/http/request/CreateUserRequest';
 import { CredentialsRequest } from 'src/core/@types/http/request/CredentialsRequest';
@@ -37,23 +37,8 @@ export class AuthService extends AuthUseCase {
   }
 
   async refresh(token: string): Promise<AuthResponse> {
-    const isTokenValid = this.jwtService.verify(token, {
-      secret: process.env.JWT_SECRET,
-    });
+    const payload = this.jwtService.verify(token);
 
-    if (!isTokenValid) {
-      throw new UnauthorizedException('Invalid token.');
-    }
-
-    const payload = this.jwtService.decode(token);
-
-    const currentTimeInMilliseconds = Date.now() / 1000;
-    const isTokenExpired = payload.exp < currentTimeInMilliseconds;
-
-    if (isTokenExpired) {
-      throw new UnauthorizedException('Token expired.');
-    }
-
-    return this.createAuthTokens(payload);
+    return this.createAuthTokens({ sub: payload.sub });
   }
 }
