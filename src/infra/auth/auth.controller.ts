@@ -50,12 +50,14 @@ export class AuthController {
   @HttpCode(201)
   @UsePipes(new ZodValidationPipe(registerBodySchema))
   async register(@Body() body: RegisterBodySchema) {
-    return await this.authUseCase.register({
+    const wasRegistered = await this.authUseCase.register({
       name: body.name,
       lastName: body.last_name,
       email: body.email,
       password: body.password,
     });
+
+    return wasRegistered ? 'User registered successfully.' : '';
   }
 
   @Post('/refresh')

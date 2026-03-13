@@ -15,11 +15,10 @@ export class AuthService extends AuthUseCase {
     super();
   }
 
-  private createAuthTokens(payload: { sub: string }) {
-    const accessToken = this.jwtService.sign(payload);
-    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
-
-    return { accessToken, refreshToken };
+  private createAuthTokens(payload: { sub: string }): AuthResponse {
+    const access_token = this.jwtService.sign(payload);
+    const refresh_token = this.jwtService.sign(payload, { expiresIn: '7d' });
+    return { access_token, refresh_token };
   }
 
   async login(credentials: CredentialsRequest): Promise<AuthResponse> {
