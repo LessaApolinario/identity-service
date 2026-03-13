@@ -65,4 +65,12 @@ export class PrismaAuthRepository extends AuthAdapter {
 
     return !!newUser?.id;
   }
+
+  async findById(id: string): Promise<User | null> {
+    return await this.prismaService.user.findUnique({
+      where: {
+        id,
+      },
+    });
+  }
 }

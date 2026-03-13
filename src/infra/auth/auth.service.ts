@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserRequest } from 'src/core/@types/http/request/CreateUserRequest';
 import { CredentialsRequest } from 'src/core/@types/http/request/CredentialsRequest';
 import { AuthResponse } from 'src/core/@types/http/response/AuthResponse';
+import { UserResponse } from 'src/core/@types/http/response/UserResponse';
 import { AuthAdapter } from 'src/core/interfaces/adapters/AuthAdapter';
 import { AuthUseCase } from 'src/core/interfaces/usecases/AuthUseCase';
 
@@ -39,5 +40,20 @@ export class AuthService extends AuthUseCase {
     const payload = this.jwtService.verify(token);
 
     return this.createAuthTokens({ sub: payload.sub });
+  }
+
+  async findById(id: string): Promise<UserResponse> {
+    const user = await this.authAdapter.findById(id);
+
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
+
+    return {
+      id: user.id,
+      name: user.name,
+      lastName: user.lastName,
+      email: user.email,
+    };
   }
 }

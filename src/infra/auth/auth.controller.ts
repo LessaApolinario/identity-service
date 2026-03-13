@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
+  Param,
   Post,
   UseGuards,
   UsePipes,
@@ -66,5 +68,12 @@ export class AuthController {
   async refresh(@Body() body: RefreshBodySchema) {
     const { token } = body;
     return await this.authUseCase.refresh(token);
+  }
+
+  @Get('/profile/:id')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard)
+  async profile(@Param('id') id: string) {
+    return await this.authUseCase.findById(id);
   }
 }
