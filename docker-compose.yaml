@@ -9,3 +9,13 @@ services:
       - .env
     volumes:
       - ./data/pg:/var/lib/postgresql/data
+  identity-service-backend:
+    build: .
+    container_name: identity-service-backend
+    restart: always
+    ports:
+      - "1139:${PORT-3000}"
+    depends_on:
+      - identity-service-backend-database
+    env_file:
+      - .env
