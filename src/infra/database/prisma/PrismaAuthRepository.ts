@@ -1,14 +1,9 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
-import bcrypt from 'bcryptjs';
+import { Injectable } from '@nestjs/common';
 import { CreateUserRequest } from 'src/core/@types/http/request/CreateUserRequest';
-import { CredentialsRequest } from 'src/core/@types/http/request/CredentialsRequest';
 import { User } from 'src/core/domain/models/User';
 import { AuthAdapter } from 'src/core/interfaces/adapters/AuthAdapter';
+import { PrismaUserMapper } from 'src/core/mappers/prisma/PrismaUserMapper';
+import { hashPassword } from 'src/core/utils/password';
 import { PrismaService } from './prisma.service';
 
 @Injectable()
@@ -17,60 +12,40 @@ export class PrismaAuthRepository extends AuthAdapter {
     super();
   }
 
-  async login(credentials: CredentialsRequest): Promise<User> {
-    const { email, password } = credentials;
+  async register(user: CreateUserRequest): Promise<User> {
+    const { name, last_name, email, password } = user;
 
-    const user = await this.prismaService.user.findUnique({
-      where: {
+    const hashedPassword = hashPassword({ password });
+
+    const newUser = await this.prismaService.user.create({
+      data: {
+        name,
+        lastName: last_name,
         email,
+        passwordHash: hashedPassword,
       },
     });
 
-    if (!user) {
-      throw new NotFoundException('User not found.');
-    }
-
-    const passwordMatch = bcrypt.compareSync(password, user.passwordHash);
-
-    if (!passwordMatch) {
-      throw new UnauthorizedException('Invalid credentials.');
-    }
-
-    return user;
+    return PrismaUserMapper.toDomain(newUser);
   }
 
-  async register(user: CreateUserRequest): Promise<boolean> {
-    const { name, lastName, email, password } = user;
+  async findById(id: string): Promise<User | null> {
+    const foundUser = await this.prismaService.user.findUnique({
+      where: {
+        id,
+      },
+    });
 
+    return foundUser ? PrismaUserMapper.toDomain(foundUser) : null;
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
     const foundUser = await this.prismaService.user.findUnique({
       where: {
         email,
       },
     });
 
-    if (foundUser) {
-      throw new ConflictException('User already exists.');
-    }
-
-    const hashedPassword = bcrypt.hashSync(password, 10);
-
-    const newUser = await this.prismaService.user.create({
-      data: {
-        name,
-        lastName,
-        email,
-        passwordHash: hashedPassword,
-      },
-    });
-
-    return !!newUser?.id;
-  }
-
-  async findById(id: string): Promise<User | null> {
-    return await this.prismaService.user.findUnique({
-      where: {
-        id,
-      },
-    });
+    return foundUser ? PrismaUserMapper.toDomain(foundUser) : null;
   }
 }

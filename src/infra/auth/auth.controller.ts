@@ -1,9 +1,11 @@
 import {
   BadRequestException,
   Body,
+  ConflictException,
   Controller,
   Get,
   HttpCode,
+  NotFoundException,
   Param,
   Post,
   UseGuards,
@@ -54,15 +56,14 @@ export class AuthController {
   @Post('/register')
   @HttpCode(201)
   @UsePipes(new ZodValidationPipe(registerUserRequestBodySchema))
-  async registerUser(@Body() body: RegisterUserRequestBody) {
-    const wasRegistered = await this.authUseCase.register({
-      name: body.name,
-      lastName: body.last_name,
-      email: body.email,
-      password: body.password,
-    });
+  async registerUser(@Body() data: RegisterUserRequestBody) {
+    const foundUser = await this.authUseCase.findByEmail(data.email);
 
-    return wasRegistered ? 'User registered successfully.' : '';
+    if (foundUser) {
+      throw new ConflictException('User already exists.');
+    }
+
+    return await this.authUseCase.register(data);
   }
 
   @Post('/refresh')
@@ -82,6 +83,12 @@ export class AuthController {
       throw new BadRequestException('id is required.');
     }
 
-    return await this.authUseCase.findById(id);
+    const foundUser = await this.authUseCase.findById(id);
+
+    if (!foundUser) {
+      throw new NotFoundException('User not found.');
+    }
+
+    return foundUser;
   }
 }
