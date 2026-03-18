@@ -15,27 +15,29 @@ import { z } from 'zod';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { Public } from './public';
 
-const loginBodySchema = z.object({
+const loginRequestBodySchema = z.object({
   email: z.string(),
   password: z.string(),
 });
 
-type LoginBodySchema = z.infer<typeof loginBodySchema>;
+type LoginRequestBody = z.infer<typeof loginRequestBodySchema>;
 
-const registerBodySchema = z.object({
+const registerUserRequestBodySchema = z.object({
   name: z.string(),
   last_name: z.string(),
   email: z.string(),
   password: z.string(),
 });
 
-type RegisterBodySchema = z.infer<typeof registerBodySchema>;
+type RegisterUserRequestBody = z.infer<typeof registerUserRequestBodySchema>;
 
-const refreshBodySchema = z.object({
+const refreshAuthTokenRequestBodySchema = z.object({
   token: z.string(),
 });
 
-type RefreshBodySchema = z.infer<typeof refreshBodySchema>;
+type RefreshAuthTokenRequestBody = z.infer<
+  typeof refreshAuthTokenRequestBodySchema
+>;
 
 @Public()
 @Controller('/auth')
@@ -44,15 +46,15 @@ export class AuthController {
 
   @Post('/login')
   @HttpCode(200)
-  @UsePipes(new ZodValidationPipe(loginBodySchema))
-  async login(@Body() body: LoginBodySchema) {
+  @UsePipes(new ZodValidationPipe(loginRequestBodySchema))
+  async login(@Body() body: LoginRequestBody) {
     return await this.authUseCase.login(body);
   }
 
   @Post('/register')
   @HttpCode(201)
-  @UsePipes(new ZodValidationPipe(registerBodySchema))
-  async registerUser(@Body() body: RegisterBodySchema) {
+  @UsePipes(new ZodValidationPipe(registerUserRequestBodySchema))
+  async registerUser(@Body() body: RegisterUserRequestBody) {
     const wasRegistered = await this.authUseCase.register({
       name: body.name,
       lastName: body.last_name,
@@ -66,8 +68,8 @@ export class AuthController {
   @Post('/refresh')
   @UseGuards(JwtAuthGuard)
   @HttpCode(200)
-  @UsePipes(new ZodValidationPipe(refreshBodySchema))
-  async refreshAuthToken(@Body() body: RefreshBodySchema) {
+  @UsePipes(new ZodValidationPipe(refreshAuthTokenRequestBodySchema))
+  async refreshAuthToken(@Body() body: RefreshAuthTokenRequestBody) {
     const { token } = body;
     return await this.authUseCase.refresh(token);
   }
