@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -51,7 +52,7 @@ export class AuthController {
   @Post('/register')
   @HttpCode(201)
   @UsePipes(new ZodValidationPipe(registerBodySchema))
-  async register(@Body() body: RegisterBodySchema) {
+  async registerUser(@Body() body: RegisterBodySchema) {
     const wasRegistered = await this.authUseCase.register({
       name: body.name,
       lastName: body.last_name,
@@ -65,7 +66,8 @@ export class AuthController {
   @Post('/refresh')
   @UseGuards(JwtAuthGuard)
   @HttpCode(200)
-  async refresh(@Body() body: RefreshBodySchema) {
+  @UsePipes(new ZodValidationPipe(refreshBodySchema))
+  async refreshAuthToken(@Body() body: RefreshBodySchema) {
     const { token } = body;
     return await this.authUseCase.refresh(token);
   }
@@ -73,7 +75,11 @@ export class AuthController {
   @Get('/profile/:id')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  async profile(@Param('id') id: string) {
+  async findUserProfileById(@Param('id') id: string) {
+    if (!id) {
+      throw new BadRequestException('id is required.');
+    }
+
     return await this.authUseCase.findById(id);
   }
 }
