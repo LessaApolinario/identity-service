@@ -1,4 +1,7 @@
- FROM node:24-alpine
+FROM node:24-alpine
+
+ARG PORT=3000
+ENV PORT=${PORT:-3000}
 
 WORKDIR /app
 
@@ -14,6 +17,6 @@ RUN npx prisma generate
 
 RUN yarn build
 
-EXPOSE 3000
+EXPOSE ${PORT}
 
 CMD ["yarn", "start:migrate:prod"]

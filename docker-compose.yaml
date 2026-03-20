@@ -9,13 +9,21 @@ services:
       - .env
     volumes:
       - ./data/pg:/var/lib/postgresql/data
+    networks:
+      - notes-bff-network
   identity-service-backend:
     build: .
     container_name: identity-service-backend
     restart: always
     ports:
-      - "1139:${PORT-3000}"
+      - "${PORT-3000}:${PORT-3000}"
     depends_on:
       - identity-service-backend-database
     env_file:
       - .env
+    networks:
+      - notes-bff-network
+
+networks:
+  notes-bff-network:
+    external: true
