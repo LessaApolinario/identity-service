@@ -14,9 +14,14 @@ function registerGlobalFilters(app: INestApplication) {
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
 }
 
+function setupCors(app: INestApplication) {
+  app.enableCors();
+}
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  setupCors(app);
   registerGlobalFilters(app);
   const port = getServerPort(app);
 
