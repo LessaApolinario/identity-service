@@ -1,18 +1,8 @@
 services:
-  identity-service-backend-database:
-    image: postgres:17-alpine
-    restart: always
-    container_name: identity-service-backend-database
-    ports:
-      - "${POSTGRES_HOST_PORT:-7401}:5432"
-    env_file:
-      - .env
-    volumes:
-      - ./data/pg:/var/lib/postgresql/data
-    networks:
-      - notes-bff-network
   identity-service-backend:
-    build: .
+    build:
+      context: .
+      dockerfile: .docker/Dockerfile.main
     container_name: identity-service-backend
     restart: always
     ports:
@@ -22,8 +12,26 @@ services:
     env_file:
       - .env
     networks:
+      - identity-service-network
       - notes-bff-network
 
+  identity-service-backend-database:
+    image: postgres:17-alpine
+    restart: always
+    container_name: identity-service-backend-database
+    ports:
+      - "${POSTGRES_HOST_PORT:-7401}:5432"
+    env_file:
+      - .env
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - identity-service-network
+
+volumes:
+  pg_data:
+
 networks:
+  identity-service-network:
   notes-bff-network:
     external: true
