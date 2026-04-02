@@ -17,6 +17,7 @@ services:
     networks:
       - identity-service-network
       - notes-bff-network
+      - crypto-bff-network
 
   identity-service-backend-database:
     image: postgres:17-alpine
@@ -37,4 +38,6 @@ volumes:
 networks:
   identity-service-network:
   notes-bff-network:
+    external: true
+  crypto-bff-network:
     external: true
