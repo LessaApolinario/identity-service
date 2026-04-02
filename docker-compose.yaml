@@ -3,10 +3,13 @@ services:
     build:
       context: .
       dockerfile: .docker/Dockerfile.main
+      args:
+        - NODE_VERSION=${NODE_VERSION:-24-alpine}
+        - PORT=${PORT:-3000}
     container_name: identity-service-backend
     restart: always
     ports:
-      - "${PORT-3000}:${PORT-3000}"
+      - "${PORT:-3000}:${PORT:-3000}"
     depends_on:
       - identity-service-backend-database
     env_file:
